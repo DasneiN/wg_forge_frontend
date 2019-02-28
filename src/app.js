@@ -1,7 +1,6 @@
 import Table from './components/table.js';
 
 import orders from '../data/orders.json';
-import users from '../data/users.json';
 import companies from '../data/companies.json';
 
 import 'bootstrap';

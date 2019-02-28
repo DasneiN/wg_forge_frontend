@@ -1,3 +1,6 @@
+import users from './../../data/users.json';
+import { findUserById, formatUserName } from './functions';
+
 export default class Table {
 
   constructor(headers, container) {
@@ -26,7 +29,7 @@ export default class Table {
 
     newRow.insertAdjacentHTML('beforeend', `
       <td>${order.transaction_id}</td>
-      <td class="user_data">${order.user_id}</td>
+      <td class="user_data">${formatUserName(findUserById(users, order.user_id))}</td>
       <td>${printDate}</td>
       <td>$${order.total}</td>
       <td>${printCardNumber}</td>
