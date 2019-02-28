@@ -1,0 +1,14 @@
+.user_data {
+
+  .user-details {
+    display: none;
+
+    &.visible {
+      display: block;
+    }
+
+    img {
+      max-width: 100px;
+    }
+  }
+}
