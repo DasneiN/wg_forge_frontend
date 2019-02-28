@@ -1,10 +1,11 @@
 import Table from './components/table.js';
 
 import orders from '../data/orders.json';
-import companies from '../data/companies.json';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+import './scss/style.scss';
 
 export default (function () {
   const app = document.getElementById('app');
