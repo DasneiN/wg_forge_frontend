@@ -1,9 +1,14 @@
 import Table from './components/table.js';
 
+import users from '../data/users.json';
+import companies from '../data/companies.json';
+import orders from '../data/orders.json';
+
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './scss/style.scss';
+import { convertData } from './components/functions.js';
 
 export default (function () {
   const app = document.getElementById('app');
@@ -21,4 +26,7 @@ export default (function () {
     'Card Type',
     'Location'
   ], container);
+
+  const data = convertData(users, companies, orders);
+  table.drawTable(data);
 }());

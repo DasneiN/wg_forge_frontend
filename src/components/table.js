@@ -24,27 +24,24 @@ export default class Table {
 
     container.appendChild(this.el);
 
-    orders.forEach(v => {
-      this.addRow(v);
-    });
-
     this.initTableSort();
   }
 
-  addRow(order) {
-    const newRow = this.tbody.insertRow();
-    newRow.setAttribute('id', `order_${order.id}`);
+  drawTable(data) {
+    data.forEach(row => {
+      const newRow = this.tbody.insertRow();
+      newRow.setAttribute('id', `order_${row.id}`);
 
-    const orderDate = new Date(+order.created_at * 1000);
-    const printDate = orderDate.toLocaleString().replace(',', '');
+      const orderDate = new Date(+row.created_at * 1000);
+      const printDate = orderDate.toLocaleString().replace(',', '');
 
-    const printCardNumber = order.card_number.split('').fill('*', 2, -4).join('');
+      const printCardNumber = row.card_number.split('').fill('*', 2, -4).join('');
 
-    const user = findById(users, order.user_id);
-    const company = user.company_id ? findById(this.companies, user.company_id) : null;
+      const {user} = row;
+      const company = user.company_id ? findById(this.companies, user.company_id) : null;
 
-    newRow.insertAdjacentHTML('beforeend', `
-      <td>${order.transaction_id}</td>
+      newRow.insertAdjacentHTML('beforeend', `
+      <td>${row.transaction_id}</td>
       <td class="user_data">
         ${formatUserName(user)}
         <div class="user-details">
@@ -55,13 +52,14 @@ export default class Table {
         </div>
       </td>
       <td>${printDate}</td>
-      <td>$${order.total}</td>
+      <td>$${row.total}</td>
       <td>${printCardNumber}</td>
-      <td>${order.card_type}</td>
-      <td>${order.order_country} (${order.order_ip})</td>
+      <td>${row.card_type}</td>
+      <td>${row.order_country} (${row.order_ip})</td>
     `);
 
-    this.initUserInfo(newRow);
+      this.initUserInfo(newRow);
+    });
   }
 
   initUserInfo(row) {
