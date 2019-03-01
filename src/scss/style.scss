@@ -1,14 +1,39 @@
-.user_data {
+.table {
 
-  .user-details {
-    display: none;
+  thead {
+    td {
+      vertical-align: middle;
+      text-align: center;
 
-    &.visible {
-      display: block;
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      span {
+        display: none;
+      }
+
+      &.active {
+        span {
+          display: inline-block;
+        }
+      }
     }
+  }
 
-    img {
-      max-width: 100px;
+  .user_data {
+
+    .user-details {
+      display: none;
+
+      &.visible {
+        display: block;
+      }
+
+      img {
+        max-width: 100px;
+      }
     }
   }
 }

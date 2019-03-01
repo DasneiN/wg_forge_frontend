@@ -1,23 +1,34 @@
 import users from './../../data/users.json';
-import companies from './../../data/companies.json';
+import companiesJSON from './../../data/companies.json';
+import orders from './../../data/orders.json';
 
 import { findById, formatUserName, formatDate } from './functions';
 
 export default class Table {
 
   constructor(headers, container) {
+    this.companies = companiesJSON;
+
     this.el = document.createElement('table');
-    this.el.className = 'table table-striped';
+    this.el.className = 'table table-striped table-bordered';
 
     const headerRow = this.el.createTHead().insertRow();
     for (let i = 0; i < headers.length; i++) {
-      headerRow.insertCell().textContent = headers[i];
+      const newTD = headerRow.insertCell();
+      newTD.innerHTML = headers[i] + '<span>&#8595;</span>';
+      newTD.setAttribute('data-sort-prop', headers[i]);
     }
 
     this.tbody = document.createElement('tbody');
     this.el.appendChild(this.tbody);
 
     container.appendChild(this.el);
+
+    orders.forEach(v => {
+      this.addRow(v);
+    });
+
+    this.initTableSort();
   }
 
   addRow(order) {
@@ -30,7 +41,7 @@ export default class Table {
     const printCardNumber = order.card_number.split('').fill('*', 2, -4).join('');
 
     const user = findById(users, order.user_id);
-    const company = user.company_id ? findById(companies, user.company_id) : null;
+    const company = user.company_id ? findById(this.companies, user.company_id) : null;
 
     newRow.insertAdjacentHTML('beforeend', `
       <td>${order.transaction_id}</td>
@@ -61,5 +72,31 @@ export default class Table {
 
       e.currentTarget.nextElementSibling.classList.toggle('visible');
     })
+  }
+
+  initTableSort() {
+    const headers = this.el.querySelectorAll('.table thead td');
+
+    headers.forEach(el => {
+      el.addEventListener('click', () => {this.sortTable(el.dataset.sortProp)});
+    });
+  }
+
+  sortTable(sortProp) {
+    this.companies.sort((a,b) => {
+      if (a[sortProp] < b[sortProp]) {
+        return -1;
+      }
+
+      if (a[sortProp] > b[sortProp]) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    console.log('-----------------');
+    console.log(this.companies);
+    console.log('-----------------');
   }
 }

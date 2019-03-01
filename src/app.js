@@ -1,7 +1,5 @@
 import Table from './components/table.js';
 
-import orders from '../data/orders.json';
-
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -23,8 +21,4 @@ export default (function () {
     'Card Type',
     'Location'
   ], container);
-
-  orders.forEach(v => {
-    table.addRow(v);
-  });
 }());
