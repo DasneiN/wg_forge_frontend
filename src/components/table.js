@@ -11,9 +11,10 @@ export default class Table {
     const headerRow = this.el.createTHead().insertRow();
 
     Object.keys(headers).forEach(v => {
-        const newTD = headerRow.insertCell();
-        newTD.innerHTML = headers[v] + '<span>&#8595;</span>';
-        newTD.setAttribute('data-sort-prop', v);
+      const newTD = document.createElement('th');
+      newTD.innerHTML = headers[v] + '<span>&#8595;</span>';
+      newTD.setAttribute('data-sort-prop', v);
+      headerRow.appendChild(newTD);
     });
 
     this.tbody = document.createElement('tbody');
@@ -78,7 +79,7 @@ export default class Table {
   }
 
   initTableSort() {
-    const headers = this.el.querySelectorAll('.table thead td');
+    const headers = this.el.querySelectorAll('.table thead th');
 
     headers.forEach(el => {
       el.addEventListener('click', (e) => {
@@ -89,7 +90,7 @@ export default class Table {
 
   sortTable(sortProp, sortTD) {
     if (sortProp !== 'card_number') {
-      const currentActive = this.el.querySelector('thead td.active');
+      const currentActive = this.el.querySelector('thead th.active');
       if (currentActive) {
         currentActive.classList.remove('active');
       }
