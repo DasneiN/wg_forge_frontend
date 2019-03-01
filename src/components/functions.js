@@ -15,3 +15,27 @@ export function formatDate(timestamp) {
 
   return `${day}/${month}/${year}`;
 }
+
+export function convertData(users, companies, orders) {
+  const data = [];
+
+  orders.forEach(order => {
+
+    const userObj = findById(users, order.user_id);
+
+    data.push({
+      order_id: order.id,
+      transaction_id: order.transaction_id,
+      created_at: order.created_at,
+      card_number: order.card_number,
+      user: userObj,
+      company: userObj.company_id ? findById(companies, userObj.company_id) : null,
+      total: order.total,
+      card_type: order.card_type,
+      order_country: order.order_country,
+      order_ip: order.order_ip,
+    });
+  });
+
+  return data;
+}

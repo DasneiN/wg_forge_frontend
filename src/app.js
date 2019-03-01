@@ -1,11 +1,23 @@
 import Table from './components/table.js';
 
+import users from '../data/users.json';
+import companies from '../data/companies.json';
 import orders from '../data/orders.json';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './scss/style.scss';
+
+const tableHeaders = {
+  transaction_id: 'Transaction ID',
+  user: 'User Info',
+  created_at: 'Order Date',
+  total: 'Order Amount',
+  card_number: 'Card Number',
+  card_type: 'Card Type',
+  location: 'Location',
+};
 
 export default (function () {
   const app = document.getElementById('app');
@@ -14,17 +26,5 @@ export default (function () {
   container.classList.add('container-fluid');
   app.appendChild(container);
 
-  const table = new Table([
-    'Transaction ID',
-    'User Info',
-    'Order Date',
-    'Order Amount',
-    'Card Number',
-    'Card Type',
-    'Location'
-  ], container);
-
-  orders.forEach(v => {
-    table.addRow(v);
-  });
+  const table = new Table(tableHeaders, container, {companies, users, orders});
 }());
