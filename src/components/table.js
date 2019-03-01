@@ -1,34 +1,34 @@
-import users from './../../data/users.json';
-import companiesJSON from './../../data/companies.json';
-import orders from './../../data/orders.json';
-
-import { findById, formatUserName, formatDate } from './functions';
+import { findById, formatUserName, formatDate, convertData } from './functions';
 
 export default class Table {
 
-  constructor(headers, container) {
-    this.companies = companiesJSON;
+  constructor(headers, container, data) {
+    this.companies = data.companies;
 
     this.el = document.createElement('table');
     this.el.className = 'table table-striped table-bordered';
 
     const headerRow = this.el.createTHead().insertRow();
-    for (let i = 0; i < headers.length; i++) {
-      const newTD = headerRow.insertCell();
-      newTD.innerHTML = headers[i] + '<span>&#8595;</span>';
-      newTD.setAttribute('data-sort-prop', headers[i]);
-    }
+
+    Object.keys(headers).forEach(v => {
+        const newTD = headerRow.insertCell();
+        newTD.innerHTML = headers[v] + '<span>&#8595;</span>';
+        newTD.setAttribute('data-sort-prop', v);
+    });
 
     this.tbody = document.createElement('tbody');
     this.el.appendChild(this.tbody);
 
     container.appendChild(this.el);
 
+    this.data = convertData(data.users, data.companies, data.orders);
+    this.drawTable();
+
     this.initTableSort();
   }
 
   drawTable(data) {
-    data.forEach(row => {
+    this.data.forEach(row => {
       const newRow = this.tbody.insertRow();
       newRow.setAttribute('id', `order_${row.id}`);
 
@@ -94,7 +94,7 @@ export default class Table {
     });
 
     console.log('-----------------');
-    console.log(this.companies);
+    console.log(sortProp);
     console.log('-----------------');
   }
 }

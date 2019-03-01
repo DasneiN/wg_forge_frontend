@@ -8,7 +8,16 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './scss/style.scss';
-import { convertData } from './components/functions.js';
+
+const tableHeaders = {
+  transaction_id: 'Transaction ID',
+  user: 'User Info',
+  created_at: 'Order Date',
+  total: 'Order Amount',
+  card_number: 'Card Number',
+  card_type: 'Card Type',
+  location: 'Location',
+};
 
 export default (function () {
   const app = document.getElementById('app');
@@ -17,16 +26,5 @@ export default (function () {
   container.classList.add('container-fluid');
   app.appendChild(container);
 
-  const table = new Table([
-    'Transaction ID',
-    'User Info',
-    'Order Date',
-    'Order Amount',
-    'Card Number',
-    'Card Type',
-    'Location'
-  ], container);
-
-  const data = convertData(users, companies, orders);
-  table.drawTable(data);
+  const table = new Table(tableHeaders, container, {companies, users, orders});
 }());
