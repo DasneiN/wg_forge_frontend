@@ -8,7 +8,8 @@ export default class Table {
     this.el = document.createElement('table');
     this.el.className = 'table table-striped table-bordered';
 
-    const headerRow = this.el.createTHead().insertRow();
+    this.thead = this.el.createTHead();
+    const headerRow = this.thead.insertRow();
 
     Object.keys(headers).forEach(v => {
       const newTD = document.createElement('th');
@@ -23,8 +24,9 @@ export default class Table {
     container.appendChild(this.el);
 
     this.data = convertData(data.users, data.companies, data.orders);
-    this.drawTable();
 
+    this.drawTable();
+    this.drawTableFooter();
     this.initTableSort();
   }
 
@@ -79,7 +81,7 @@ export default class Table {
   }
 
   initTableSort() {
-    const headers = this.el.querySelectorAll('.table thead th');
+    const headers = this.thead.querySelectorAll('th');
 
     headers.forEach(el => {
       el.addEventListener('click', (e) => {
@@ -90,7 +92,7 @@ export default class Table {
 
   sortTable(sortProp, sortTD) {
     if (sortProp !== 'card_number') {
-      const currentActive = this.el.querySelector('thead th.active');
+      const currentActive = this.thead.querySelector('th.active');
       if (currentActive) {
         currentActive.classList.remove('active');
       }
@@ -147,13 +149,79 @@ export default class Table {
       }
     }
 
-    // console.clear();
     console.log('-----------------');
     console.log(sortProp);
-    // console.table(this.data);
-    // console.log(this.data.map(v => v.user));
-    // console.log('-----------------');
 
     this.reDraw();
+  }
+
+  drawTableFooter() {
+    this.tfoot = this.el.appendChild(document.createElement('tfoot'));
+
+    this.stats = this.calcTableStatistic();
+
+    const colspan = 6;
+
+    this.tfoot.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>Orders Count</td>
+        <td colspan="${colspan}">${this.stats.orders_count}</td>
+      </tr>
+      <tr>
+        <td>Orders Total</td>
+        <td colspan="${colspan}">${this.stats.orders_total}</td>
+      </tr>
+      <tr>
+        <td>Median Value</td>
+        <td colspan="${colspan}">$ ${this.stats.median_value}</td>
+      </tr>
+      <tr>
+        <td>Average Check</td>
+        <td colspan="${colspan}">$ ${this.stats.average_check}</td>
+      </tr>
+      <tr>
+        <td>Average Check (Female)</td>
+        <td colspan="${colspan}">$ ${this.stats.average_check_male}</td>
+      </tr>
+      <tr>
+        <td>Average Check (Male)</td>
+        <td colspan="${colspan}">$ ${this.stats.average_check_female}</td>
+      </tr>
+    `);
+  }
+
+  calcTableStatistic() {
+    const orders_count = this.data.length;
+    const orders_total = (this.data.reduce((ac, v) => ac + v.total * 100, 0) / 100);
+    const average_check = Math.round((orders_total * 100 / orders_count)) / 100;
+
+    const dataMale = this.data.filter(v => v.user.gender === 'Male');
+    const orders_count_male = dataMale.length;
+    const orders_total_male = (dataMale.reduce((ac, v) => ac + v.total * 100, 0) / 100);
+    const average_check_male = Math.round((orders_total_male * 100 / orders_count_male)) / 100;
+
+    const dataFemale = this.data.filter(v => v.user.gender === 'Female');
+    const orders_count_female = dataFemale.length;
+    const orders_total_female = (dataFemale.reduce((ac, v) => ac + v.total * 100, 0) / 100);
+    const average_check_female = Math.round((orders_total_female * 100 / orders_count_female)) / 100;
+
+    const totals = this.data
+      .map(v => +v.total)
+      .sort((a, b) => {
+        return a - b;
+      });
+
+    const median_value = totals.length % 2
+      ? totals[Math.floor(totals.length / 2)]
+      : Math.round((totals[totals.length / 2 - 1] * 100 + totals[totals.length / 2 - 1] * 100) / 2 ) / 100;
+
+    return {
+      orders_count,
+      orders_total,
+      average_check,
+      average_check_male,
+      average_check_female,
+      median_value,
+    };
   }
 }
