@@ -27,4 +27,12 @@ export default (function () {
   app.appendChild(container);
 
   const table = new Table(tableHeaders, container, {companies, users, orders});
+
+  fetch('https://api.exchangeratesapi.io/latest?base=USD')
+    .then((res, err) => {
+      return res.json();
+    })
+    .then((r, e) => {
+      console.log(r);
+    });
 }());

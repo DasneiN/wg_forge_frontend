@@ -18,16 +18,18 @@ export default class Table {
       headerRow.appendChild(newTD);
     });
 
-    this.tbody = document.createElement('tbody');
-    this.el.appendChild(this.tbody);
+    this.tbody = this.el.appendChild(document.createElement('tbody'));
+    this.tfoot = this.el.appendChild(document.createElement('tfoot'));
 
     container.appendChild(this.el);
 
     this.data = convertData(data.users, data.companies, data.orders);
+    this.dataBackup = Array.from(this.data);
 
     this.drawTable();
     this.drawTableFooter();
     this.initTableSort();
+    this.drawSearch();
   }
 
   drawTable() {
@@ -63,11 +65,6 @@ export default class Table {
 
       this.initUserInfo(newRow);
     });
-  }
-
-  reDraw() {
-    this.tbody.innerHTML = '';
-    this.drawTable();
   }
 
   initUserInfo(row) {
@@ -149,63 +146,75 @@ export default class Table {
       }
     }
 
-    console.log('-----------------');
-    console.log(sortProp);
+    this.resetTable();
+  }
 
-    this.reDraw();
+  resetTable(activeSortCell = null) {
+    this.tbody.innerHTML = '';
+    this.tfoot.innerHTML = '';
+
+    this.drawTable();
+    this.drawTableFooter();
+
+    if (activeSortCell) {
+      this.sortTable(activeSortCell.dataset.sortProp, activeSortCell);
+    }
+  }
+
+  reDrawTableFooter() {
+    this.tfoot.innerHTML = '';
+    this.drawTableFooter();
   }
 
   drawTableFooter() {
-    this.tfoot = this.el.appendChild(document.createElement('tfoot'));
-
-    this.stats = this.calcTableStatistic();
+    this.stats = this.calcTableStatistic(this.data);
 
     const colspan = 6;
 
     this.tfoot.insertAdjacentHTML('beforeend', `
       <tr>
         <td>Orders Count</td>
-        <td colspan="${colspan}">${this.stats.orders_count}</td>
+        <td colspan="${colspan}">${this.stats.orders_count || 'n/a'}</td>
       </tr>
       <tr>
         <td>Orders Total</td>
-        <td colspan="${colspan}">${this.stats.orders_total}</td>
+        <td colspan="${colspan}">${this.stats.orders_total || 'n/a'}</td>
       </tr>
       <tr>
         <td>Median Value</td>
-        <td colspan="${colspan}">$ ${this.stats.median_value}</td>
+        <td colspan="${colspan}">${this.stats.median_value ? `$ ${this.stats.median_value}` : 'n/a'}</td>
       </tr>
       <tr>
         <td>Average Check</td>
-        <td colspan="${colspan}">$ ${this.stats.average_check}</td>
+        <td colspan="${colspan}">${this.stats.average_check ? `$ ${this.stats.average_check}` : 'n/a'}</td>
       </tr>
       <tr>
         <td>Average Check (Female)</td>
-        <td colspan="${colspan}">$ ${this.stats.average_check_male}</td>
+        <td colspan="${colspan}">${this.stats.average_check_female ? `$ ${this.stats.average_check_female}` : 'n/a'}</td>
       </tr>
       <tr>
         <td>Average Check (Male)</td>
-        <td colspan="${colspan}">$ ${this.stats.average_check_female}</td>
+        <td colspan="${colspan}">${this.stats.average_check_male ? `$ ${this.stats.average_check_male}` : 'n/a'}</td>
       </tr>
     `);
   }
 
-  calcTableStatistic() {
-    const orders_count = this.data.length;
-    const orders_total = (this.data.reduce((ac, v) => ac + v.total * 100, 0) / 100);
+  calcTableStatistic(data) {
+    const orders_count = data.length;
+    const orders_total = (data.reduce((ac, v) => ac + v.total * 100, 0) / 100);
     const average_check = Math.round((orders_total * 100 / orders_count)) / 100;
 
-    const dataMale = this.data.filter(v => v.user.gender === 'Male');
+    const dataMale = data.filter(v => v.user.gender === 'Male');
     const orders_count_male = dataMale.length;
     const orders_total_male = (dataMale.reduce((ac, v) => ac + v.total * 100, 0) / 100);
     const average_check_male = Math.round((orders_total_male * 100 / orders_count_male)) / 100;
 
-    const dataFemale = this.data.filter(v => v.user.gender === 'Female');
+    const dataFemale = data.filter(v => v.user.gender === 'Female');
     const orders_count_female = dataFemale.length;
     const orders_total_female = (dataFemale.reduce((ac, v) => ac + v.total * 100, 0) / 100);
     const average_check_female = Math.round((orders_total_female * 100 / orders_count_female)) / 100;
 
-    const totals = this.data
+    const totals = data
       .map(v => +v.total)
       .sort((a, b) => {
         return a - b;
@@ -223,5 +232,46 @@ export default class Table {
       average_check_female,
       median_value,
     };
+  }
+
+  drawSearch() {
+    this.thead.insertAdjacentHTML('afterbegin', `
+    <tr>
+      <th><label for="search">Search:</label></th>
+      <th colspan="6"><input type="text" id="search" placeholder="Enter your request" autocomplete="off" autofocus></th>
+    </tr>
+    `);
+
+    this.search = this.thead.querySelector('#search');
+
+    this.search.addEventListener('input', e => {
+      const request = e.target.value.toLowerCase();
+
+      if (request.length > 0) {
+        this.data = this.dataBackup.filter(v => {
+          const searchData = [
+            v.user.first_name,
+            v.user.last_name,
+            v.transaction_id,
+            v.user.id.toString(),
+            v.total.toString(),
+            v.card_type,
+            v.order_country,
+            v.order_ip.toString(),
+            ].map(val => val.toLowerCase());
+
+          return searchData.some(item => item.includes(request));
+        });
+      } else {
+        this.data = this.dataBackup;
+      }
+
+      if (this.data.length > 0) {
+        this.resetTable(this.thead.querySelector('th.active'));
+      } else {
+        this.tbody.innerHTML = '<tr><td colspan="7">Nothing found</td></tr>';
+        this.reDrawTableFooter();
+      }
+    });
   }
 }
