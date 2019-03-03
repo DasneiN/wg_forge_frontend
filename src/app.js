@@ -26,13 +26,29 @@ export default (function () {
   container.classList.add('container-fluid');
   app.appendChild(container);
 
-  const table = new Table(tableHeaders, container, {companies, users, orders});
+  // fetch('https://api.exchangeratesapi.io/latest?base=USD')
+  //   .then((res, err) => {
+  //     return res.json();
+  //   })
+  //   .then((r, e) => {
+  //     console.log(r);
+  //   });
 
-  fetch('https://api.exchangeratesapi.io/latest?base=USD')
-    .then((res, err) => {
-      return res.json();
-    })
-    .then((r, e) => {
-      console.log(r);
-    });
+  Promise.all([
+    fetch('http://localhost:9000/api/companies.json').then(v => v.json()),
+    fetch('http://localhost:9000/api/users.json').then(v => v.json()),
+    fetch('http://localhost:9000/api/orders.json').then(v => v.json()),
+  ])
+  .then(([companies, users, orders]) => {
+    const data = {
+      companies,
+      users,
+      orders,
+    };
+
+    app.table = new Table(tableHeaders, container, data);
+  })
+  .catch(err => {
+    console.log(err);
+  });
 }());
