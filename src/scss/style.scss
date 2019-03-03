@@ -1,39 +1,62 @@
 .table {
 
   thead {
-    th {
-      vertical-align: middle;
-      text-align: center;
+    border-bottom: 3px solid #ccc;
 
-      &:hover {
-        cursor: pointer;
-        text-decoration: underline;
+    tr {
+
+      th {
+        vertical-align: middle;
+        text-align: center;
+
+        input {
+          float: left;
+          width: 50%;
+          min-width: 200px;
+        }
       }
 
-      span {
-        display: none;
-      }
+      &:nth-of-type(2) {
 
-      &.active {
-        span {
-          display: inline-block;
+        th {
+
+          &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+          }
+
+          span {
+            display: none;
+          }
+
+          &.active {
+            span {
+              display: inline-block;
+            }
+          }
         }
       }
     }
   }
 
-  .user_data {
+  tbody {
+    .user_data {
 
-    .user-details {
-      display: none;
+      .user-details {
+        display: none;
 
-      &.visible {
-        display: block;
-      }
+        &.visible {
+          display: block;
+        }
 
-      img {
-        max-width: 100px;
+        img {
+          max-width: 100px;
+        }
       }
     }
+  }
+
+  tfoot {
+    border-top: 2px solid #ccc;
   }
 }
