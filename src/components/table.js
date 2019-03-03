@@ -1,8 +1,10 @@
 import { findById, formatUserName, formatDate, convertData } from './functions';
 
-export default class Table {
+import currencymap from './../../data/currencymap.json';
 
+export default class Table {
   constructor(headers, container, data) {
+    this.currencymap = currencymap;
     this.companies = data.companies;
 
     this.el = document.createElement('table');
@@ -29,7 +31,7 @@ export default class Table {
     this.drawTable();
     this.drawTableFooter();
     this.initTableSort();
-    this.drawSearch();
+    this.drawTableHeader();
   }
 
   drawTable() {
@@ -57,7 +59,7 @@ export default class Table {
         </div>
       </td>
       <td>${printDate}</td>
-      <td>$${row.total}</td>
+      <td>${this.getCurrencySymbol()} ${row.total}</td>
       <td>${printCardNumber}</td>
       <td>${row.card_type}</td>
       <td>${row.order_country} (${row.order_ip})</td>
@@ -182,19 +184,19 @@ export default class Table {
       </tr>
       <tr>
         <td>Median Value</td>
-        <td colspan="${colspan}">${this.stats.median_value ? `$ ${this.stats.median_value}` : 'n/a'}</td>
+        <td colspan="${colspan}">${this.stats.median_value ? `${this.getCurrencySymbol()} ${this.stats.median_value}` : 'n/a'}</td>
       </tr>
       <tr>
         <td>Average Check</td>
-        <td colspan="${colspan}">${this.stats.average_check ? `$ ${this.stats.average_check}` : 'n/a'}</td>
+        <td colspan="${colspan}">${this.stats.average_check ? `${this.getCurrencySymbol()} ${this.stats.average_check}` : 'n/a'}</td>
       </tr>
       <tr>
         <td>Average Check (Female)</td>
-        <td colspan="${colspan}">${this.stats.average_check_female ? `$ ${this.stats.average_check_female}` : 'n/a'}</td>
+        <td colspan="${colspan}">${this.stats.average_check_female ? `${this.getCurrencySymbol()} ${this.stats.average_check_female}` : 'n/a'}</td>
       </tr>
       <tr>
         <td>Average Check (Male)</td>
-        <td colspan="${colspan}">${this.stats.average_check_male ? `$ ${this.stats.average_check_male}` : 'n/a'}</td>
+        <td colspan="${colspan}">${this.stats.average_check_male ? `${this.getCurrencySymbol()} ${this.stats.average_check_male}` : 'n/a'}</td>
       </tr>
     `);
   }
@@ -235,13 +237,6 @@ export default class Table {
   }
 
   drawSearch() {
-    this.thead.insertAdjacentHTML('afterbegin', `
-    <tr>
-      <th><label for="search">Search:</label></th>
-      <th colspan="6"><input type="text" id="search" placeholder="Enter your request" autocomplete="off" autofocus></th>
-    </tr>
-    `);
-
     this.search = this.thead.querySelector('#search');
 
     this.search.addEventListener('input', e => {
@@ -273,5 +268,62 @@ export default class Table {
         this.reDrawTableFooter();
       }
     });
+  }
+
+  drawTableHeader() {
+    this.thead.insertAdjacentHTML('afterbegin', `
+    <tr>
+      <th><label for="search">Search:</label></th>
+      <th colspan="3"><input type="text" id="search" placeholder="Enter your request" autocomplete="off" autofocus></th>
+      <th></th>
+      <th><label for="currency">Choose currency:</label></th>
+      <th>
+        <select id="currency"></select>
+      </th>
+    </tr>
+    `);
+
+    this.drawSearch();
+    this.loadExchangeRates();
+  }
+
+  loadExchangeRates() {
+    fetch('https://api.exchangeratesapi.io/latest?base=USD')
+      .then(res => {
+        return res.json();
+      })
+      .then(r => {
+        this.drawCurrency(r);
+      })
+      .catch(err => {
+        console.log(err, '\nRetrying fetch data...');
+        setTimeout(this.loadExchangeRates(), 5000);
+      });
+  }
+
+  drawCurrency(data) {
+    console.log(data);
+    this.currency = this.thead.querySelector('#currency');
+
+    this.currency.insertAdjacentHTML('beforeend',
+      Object.keys(data.rates).map(v => `<option value="${data.rates[v]}" ${v === 'USD' ? 'selected' : ''}>${v}</option>`)
+    );
+
+    this.currency.addEventListener('change', e => {
+      this.currencyPrevRate = this.currencyRate || 1;
+      this.currencyRate = this.currency.value;
+      this.currencyName = this.currency.options[this.currency.selectedIndex].textContent;
+
+      this.data.forEach(v => {
+        v.total = Math.round(v.total * 100 / this.currencyPrevRate * this.currencyRate) / 100;
+      });
+      this.resetTable();
+    });
+  }
+
+  getCurrencySymbol() {
+    const sym = this.currencymap[this.currencyName || 'USD'].symbol;
+
+    return sym;
   }
 }

@@ -1,9 +1,5 @@
 import Table from './components/table.js';
 
-import users from '../data/users.json';
-import companies from '../data/companies.json';
-import orders from '../data/orders.json';
-
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -26,13 +22,21 @@ export default (function () {
   container.classList.add('container-fluid');
   app.appendChild(container);
 
-  const table = new Table(tableHeaders, container, {companies, users, orders});
+  Promise.all([
+    fetch('http://localhost:9000/api/companies.json').then(v => v.json()),
+    fetch('http://localhost:9000/api/users.json').then(v => v.json()),
+    fetch('http://localhost:9000/api/orders.json').then(v => v.json()),
+  ])
+  .then(([companies, users, orders]) => {
+    const data = {
+      companies,
+      users,
+      orders,
+    };
 
-  fetch('https://api.exchangeratesapi.io/latest?base=USD')
-    .then((res, err) => {
-      return res.json();
-    })
-    .then((r, e) => {
-      console.log(r);
-    });
+    app.table = new Table(tableHeaders, container, data);
+  })
+  .catch(err => {
+    console.log(err);
+  });
 }());
