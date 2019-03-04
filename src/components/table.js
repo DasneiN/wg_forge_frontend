@@ -322,8 +322,6 @@ export default class Table {
   }
 
   getCurrencySymbol() {
-    const sym = this.currencymap[this.currencyName || 'USD'].symbol;
-
-    return sym;
+    return this.currencymap[this.currencyName || 'USD'].symbol;
   }
 }
