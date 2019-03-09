@@ -302,7 +302,6 @@ export default class Table {
   }
 
   drawCurrency(data) {
-    console.log(data);
     this.currency = this.thead.querySelector('#currency');
 
     this.currency.insertAdjacentHTML('beforeend',
