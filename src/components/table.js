@@ -302,7 +302,6 @@ export default class Table {
   }
 
   drawCurrency(data) {
-    console.log(data);
     this.currency = this.thead.querySelector('#currency');
 
     this.currency.insertAdjacentHTML('beforeend',
@@ -322,8 +321,6 @@ export default class Table {
   }
 
   getCurrencySymbol() {
-    const sym = this.currencymap[this.currencyName || 'USD'].symbol;
-
-    return sym;
+    return this.currencymap[this.currencyName || 'USD'].symbol;
   }
 }
